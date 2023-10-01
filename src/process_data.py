@@ -2,8 +2,10 @@ import numpy as np
 import uproot
 import h5py
 
+
 def energy(tof, x, m, c):
     return m * (1 / np.sqrt(1 - x * x / c / c / tof / tof) - 1)
+
 
 def get_data(run_number, detector):
     run_number = str(run_number)
@@ -19,6 +21,7 @@ def get_data(run_number, detector):
         if BN[i] != BN[i - 1]:
             norm += PI[i]
     return tflash, tof, amp, norm
+
 
 def process_data(run_numbers, detector, output):
     tflash = np.array([])
@@ -40,4 +43,4 @@ def process_data(run_numbers, detector, output):
     f.create_dataset("energy", data=en)
     f.create_dataset("amp", data=amp)
     f.create_dataset("norm", data=[norm])
-    f.close
+    f.close()

@@ -165,3 +165,5 @@ data/run*root
 **/.ipynb_checkpoints
 **/.DS_Store
 temp_data/*.hdf5
+.vscode
+**/.vscode
