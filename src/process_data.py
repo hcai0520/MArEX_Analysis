@@ -12,7 +12,7 @@ def get_data(run_number, detector):
     data = uproot.open("data/run" + run_number + ".root")[detector + ";1"]
     tflash = data['tflash'].array(library="np")
     tof = data['tof'].array(library="np")
-    detn = data['detn'].array(library="np")
+    # detn = data['detn'].array(library="np")
     BN = data['BunchNumber'].array(library="np")
     PI = data['PulseIntensity'].array(library="np")
     amp = data['amp'].array(library="np")
@@ -38,7 +38,7 @@ def process_data(run_numbers, detector, output):
         amp = np.append(amp, amp_i)
         norm += norm_i
     real_tof = tof - tflash + L / 299792458 * 1e9
-    en = energy(real_tof, L, 939.56542, 299792458)
+    en = energy(real_tof / 1e9, L, 939.56542, 299792458) * 1e6
     f = h5py.File(output, "w")
     f.create_dataset("energy", data=en)
     f.create_dataset("amp", data=amp)
