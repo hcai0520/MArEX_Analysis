@@ -13,7 +13,7 @@ sys.path.append('src/..')
 from src.process_data import process_data
 
 parser = argparse.ArgumentParser()
-parser.add_argument("infile", type=argparse.FileType("r"), help="input file with detector and list of run numbers")
+parser.add_argument("infile", type=argparse.FileType("r"), help="input file with list of run numbers")
 
 
 parser.add_argument("detector", type=str, help="detector")
@@ -33,10 +33,6 @@ runnumber=[]
 
 for line in args.infile:
     runnumber.append(int(line))
-
- 
-
-    
 
     #runnumber=np.append(int(line.strip()))
 process_data(runnumber, args.detector, args.output)
