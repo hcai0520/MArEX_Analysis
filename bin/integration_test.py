@@ -36,7 +36,6 @@ real_tof = tof - tflash + L / 299792458 * 1e9
 en = energy(real_tof / 1e9, L, 939.56542, 299792458) * 1e6
 
 
-
 with open(args.config,'r') as cfg:
     config=yaml.safe_load(cfg)
 
