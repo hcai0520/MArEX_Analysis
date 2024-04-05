@@ -1,0 +1,15 @@
+alpha_cut:
+  amp: 4000
+roi_cut:
+  e_max: 1000
+  e_min: 600
+
+FIMG:
+  tof_cut:
+    max_det1: 10000 ## in ns
+    min_det1: 8102 ## in ns
+    max_det2: 89408 ## in ns
+    min_det2: 8174  ## in ns
+  alpha_cut:
+    amp_det1: 600 #a.u.
+    amp_det2: 400 #a.u.

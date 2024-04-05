@@ -1,0 +1,137 @@
+Stability:
+  Air_bottle:
+    data: data
+    filter: empty
+    runlist:
+    - 117746
+    - 117747
+    - 117748
+    - 117749
+    - 117750
+    - 117751
+    - 117752
+    - 117753
+    - 117754
+    - 117755
+    - 117756
+    - 117757
+    - 117761
+    - 117762
+    - 117763
+    - 117764
+    - 117765
+    - 117766
+    target: air_bottle
+  
+  
+  Argon_bottle_231017:
+    data: data
+    filter: empty_231017
+    endf: temp_data/Ar.txt
+    en_low: 1e3
+    en_high: 1e5
+    num_density: 0.053673007127624364
+    runlist:
+      - 117665
+     
+    target: argon_bottle
+    thickness: 11  
+
+  Argon_bottle_231018:
+    data: data
+    filter: empty_231018
+    endf: temp_data/Ar.txt
+    en_low: 1e3
+    en_high: 1e5
+    num_density: 0.053673007127624364
+    runlist:
+      - 117680
+      - 117686
+      - 117684
+      - 117685
+      - 117687
+    target: argon_bottle
+    thickness: 11  
+
+  Argon_bottle_231019:
+    data: data
+    filter: empty_231019
+    endf: temp_data/Ar.txt
+    en_low: 1e3
+    en_high: 1e5
+    num_density: 0.053673007127624364
+    runlist: 
+      - 117688
+      - 117692
+      - 117693
+      - 117710
+    target: argon_bottle
+    thickness: 11  
+
+  Argon_bottle_231020:
+    data: data
+    filter: empty_231020
+    endf: temp_data/Ar.txt
+    en_low: 1e3
+    en_high: 1e5
+    num_density: 0.053673007127624364
+    runlist:
+      - 117710
+      - 117711
+      - 117712
+      - 117713
+      - 117714
+      - 117716
+      - 117717
+      - 117718
+    target: argon_bottle
+    thickness: 11  
+
+  Argon_bottle_231021:
+    data: data
+    filter: empty_231021
+    endf: temp_data/Ar.txt
+    en_low: 1e3
+    en_high: 1e5
+    num_density: 0.053673007127624364
+    runlist:
+      - 117724
+      - 117725
+      - 117726
+      - 117727
+      - 117728
+    target: argon_bottle
+    thickness: 11  
+
+  Argon_bottle_231022:
+    data: data
+    filter: empty_231022
+    endf: temp_data/Ar.txt
+    en_low: 1e3
+    en_high: 1e5
+    num_density: 0.053673007127624364
+    runlist:
+      - 117729
+      - 117730
+      - 117731
+      - 117732
+      - 117733
+      - 117734
+      - 117735
+    target: argon_bottle
+    thickness: 11  
+
+  Argon_bottle_231023:
+    data: data
+    filter: empty_231023
+    endf: temp_data/Ar.txt
+    en_low: 1e3
+    en_high: 1e5
+    num_density: 0.053673007127624364
+    runlist: 
+      - 117736
+      - 117737
+      - 117738
+    target: argon_bottle
+    thickness: 11  
+

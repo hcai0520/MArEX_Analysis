@@ -7,21 +7,33 @@ import numpy as np
 import sys
 import prettytable as pt
 import yaml
+import pandas as pd
 sys.path.append('src/..')
 #sys.path.append('config/')
 from src.cut import *
-#from src.transmission import transmission
+from src.transmission import transmission
+def save_to_excel(bins,title,location):
+    df=pd.DataFrame({
+        'bin_id':list(range(len(bins))),
+        'bin_content': bins
+    })
+
+    df.to_excel(location + title+'.xlsx')
+###################################    
 
 parser = argparse.ArgumentParser()
-parser.add_argument("input", type=str, help="intput file(.hdf5)")
+#parser.add_argument("input", type=str, help="intput file(.hdf5)")
 parser.add_argument("config",type=str, help="config file of input file")
 parser.add_argument("tag",type=str,help="tag of input files")
-parser.add_argument("detector", type=str,choices=['PTBC','PKUP','FIMG'], help="detector")
 parser.add_argument("conditions", type=str, help="conditions of input file")
+parser.add_argument("detector", type=str,choices=['PTBC','PKUP','FIMG'], help="detector")
 
-parser.add_argument("--cut",type=str, help="cut of energy and amplitude ")
-#parser.add_argument("output_out", type=str, help="output file (.hdf5) of target out")
+
+parser.add_argument("-c","--cut", type = bool,help="cut of tof and amplitude ")
+parser.add_argument("-r","--record", type = bool, help="record information of cut data")
 parser.add_argument("--screen_dump",action="store_true",help="print the data of input file")
+parser.add_argument('-o',"--output", type=str, help="location of output")
+
 
 parser.add_argument("--compare",type=str,help="another input files for cpmarison")
 parser.add_argument("-cc","--config_compare",type=str, help="configuration of file of comparison")
@@ -35,22 +47,48 @@ parser.add_argument("--max",type=int,help="the number of printed data")
 
 args = parser.parse_args()
 
+if args.output:
+    location= args.output
+else:
+    location= 'temp_data/integration_record/'  
+
 #########
 with open(args.config,'r') as cfg:
     config=yaml.safe_load(cfg)
 if args.compare:     
     with open(args.config_compare,'r') as cfg_c:
-        config_c=yaml.safe_load(cfg_c)     
-with open(args.cut,'r') as cuts:
-    cut=yaml.safe_load(cuts)
+        config_c=yaml.safe_load(cfg_c)  
+#if args.cut:           
+#    with open(args.cut,'r') as cuts:
+#        cut=yaml.safe_load(cuts)
 ##########
+input = 'temp_data/' +config[args.tag][args.conditions]['data'] + '_' + config[args.tag][args.conditions]['target'] + '_'+config[args.tag][args.conditions]['filter']+'_'+args.detector+'.h5'
+print("reading file: " + input)
 
-Infile = h5py.File(args.input, "r")
-tof_In=Infile[args.detector]['tof'][:]
-amp_In = Infile[args.detector]['amp'][:]
-en_In = Infile[args.detector]['energy'][:]
-norm_In = Infile[args.detector]['norm'][0]
+if args.cut:
+    tof_In_select,en_In_select,norm_In = get_cut(input,args.detector)
+    if args.record:
+        df=pd.DataFrame({
+        'tof':tof_In_select,
+        'en': en_In_select,
+        'norm' : norm_In
+        })
+
+        df.to_excel('temp_data/' + config[args.tag][args.conditions]['target'] + '_'+config[args.tag][args.conditions]['filter']+'_'+args.detector +'.xlsx')
+        
+else:
+    Infile = h5py.File(input, "r")
+    tof_In=Infile[args.detector]['tof'][:]
+    amp_In = Infile[args.detector]['amp'][:]
+    en_In = Infile[args.detector]['energy'][:]
+    norm_In = Infile[args.detector]['norm'][0]
+
+
+
+
 if args.compare:
+    input_compare='temp_data/'+config_c[args.tag_compare][args.conditions_compare]['data'] +'_'+config_c[args.tag_compare][args.conditions_compare]['target']+'_' +str(config_c[args.tag_compare][args.conditions_compare]['filter']) + '_' + args.detector_compare+'.h5'
+    print("reading file: " + input_compare)
     Comparefile = h5py.File(args.compare, "r")
     tof_Compare=Comparefile[args.detector_compare]['tof'][:]
     amp_Compare = Comparefile[args.detector_compare]['amp'][:]
@@ -60,7 +98,6 @@ if args.compare:
  ###############################################
 if args.screen_dump:
     tb_config=pt.PrettyTable()
-#    tb_config.title = str(config['setup_info']['data']) + str(config['setup_info']['filter']) + '_' + str(config['setup_info']['thickness'])+'mm_'+ str(config['setup_info']['target'] )
     tb_config.field_names=['data','filter','target','norm']
     tb_config.add_row([config[args.tag][args.conditions]['data'], config[args.tag][args.conditions]['filter'], config[args.tag][args.conditions]['target'],norm_In])  
     tb_in = pt.PrettyTable()
@@ -71,8 +108,7 @@ if args.screen_dump:
             for i in range(args.max):
                 tb_in.add_row([i,amp_In[i], tof_In[i], en_In[i]])                
         else:
-            print("Index is out of range")
-               
+            print("Index is out of range")                
     else:
         for i in range(len(tof_In)): 
             tb_in.add_row([i,amp_In[i], tof_In[i], en_In[i]])
@@ -96,81 +132,78 @@ if args.screen_dump:
         else:
             for i in range(len(tof_Compare)): 
                 tb_compare.add_row([i,amp_Compare[i], tof_Compare[i], en_Compare[i]])
-    #("Input file data")          
+          
         print(tb_compare_config)
         print(tb_compare)
 
 ############################################################
 bins_en=100
-bins_tof=100    
-if args.cut:
-    en_In_select,tof_In_select=data_cut(en_In,tof_In,cut['roi_cut']['e_min'],cut['roi_cut']['e_max'],cut['alpha_cut']['amp'])
-    if args.compare:
-        en_Compare_select,tof_Compare_select=data_cut(en_Compare,tof_Compare,cut['roi_cut']['e_min'],cut['roi_cut']['e_max'],cut['alpha_cut']['amp'])
-
+bins_tof=100 
 title_en='En_' + str(config[args.tag][args.conditions]['data']) +'_'+config[args.tag][args.conditions]['target']+'_' +str(config[args.tag][args.conditions]['filter']) + '_' + args.detector
 title_tof='TOF_' + str(config[args.tag][args.conditions]['data']) +'_'+config[args.tag][args.conditions]['target']+'_' +str(config[args.tag][args.conditions]['filter']) + '_' + args.detector
+#############################################################
+#if args.cut:
+#    en_In_select,tof_In_select=data_cut(en_In,tof_In,amp_In,cut['roi_cut']['e_min'],cut['roi_cut']['e_max'],cut['alpha_cut']['amp'])
+#    if args.compare:
+#        en_Compare_select,tof_Compare_select=data_cut(en_Compare,tof_Compare,amp_Compare,cut['roi_cut']['e_min'],cut['roi_cut']['e_max'],cut['alpha_cut']['amp'])
+###########################################################
 if args.compare:
     title_en_c='En_' + str(config_c[args.tag_compare][args.conditions_compare]['data']) +'_'+config_c[args.tag_compare][args.conditions_compare]['target']+'_' +str(config_c[args.tag_compare][args.conditions_compare]['filter']) + '_' + args.detector_compare
     title_tof_c='TOF_' + str(config_c[args.tag_compare][args.conditions_compare]['data']) +'_'+config_c[args.tag_compare][args.conditions_compare]['target']+'_' +str(config_c[args.tag_compare][args.conditions_compare]['filter']) + '_' + args.detector_compare  
-if args.compare:
     if args.cut:
         hist_in,bins_in,_=plt.hist(en_In_select,bins_en,alpha = 0.5,color='green',label='En_' + str(config['setup_info']['data']) + str(config['setup_info']['filter']) + '_' + str(config['setup_info']['thickness'])+'mm_'+ str(config['setup_info']['target'] ))
+        hist_in_tof,bins_in_tof,_ = plt.hist(tof_In_select,bins_tof,label='tof_in')    
         plt.clf()   
     else:    
         hist_in,bins_in,_ = plt.hist(en_In,bins_en,alpha = 0.5,color='green',label='En_in')
+        hist_in_tof,bins_in_tof,_  = plt.hist(tof_In,bins_tof,label='tof_in')
         plt.clf()
     x_en = (bins_in[1:] + bins_in[:-1]) / 2
     error_in = np.sqrt(hist_in)
     plt.errorbar(x_en,hist_in,error_in,fmt ='o',ecolor='r',ms=2.5,elinewidth=1.5,label=title_en)
     hist_compare,bins_compare,_=plt.hist(en_Compare_select,bins_en,label=title_en_c)          
-    #np.savetxt('En_'+str(config['setup_info']['data']) + str(config['setup_info']['filter']) + '_' + str(config['setup_info']['thickness'])+'mm_'+ str(config['setup_info']['target'] )+'.txt',np.array(hist_in))
-    #np.savetxt('En_'+str(config_c['setup_info']['data']) + str(config_c['setup_info']['filter']) + '_' + str(config_c['setup_info']['thickness'])+'mm_'+ str(config_c['setup_info']['target'] )+'.txt',np.array(hist_compare))
-    plt.legend(loc='upper right')
+
+    plt.legend()
     plt.xlabel('En')
     plt.ylabel('N')
-    plt.savefig('./NvsEn',dpi=600)
+    plt.savefig('temp_data/NvsEn',dpi=600)
     plt.clf()
-    if args.cut:
-        hist_in_tof,bins_in_tof,_ = plt.hist(tof_In_select,bins_tof,label='tof_in')
-        plt.clf()
-    else:
-        hist_in_tof,bins_in_tof,_  = plt.hist(tof_In,bins_tof,label='tof_in')
-        plt.clf()
+    
     x_tof = (bins_in_tof[1:] + bins_in_tof[:-1]) / 2
     error_in_tof = np.sqrt(hist_in_tof)
     plt.errorbar(x_tof,hist_in_tof,error_in_tof,fmt ='o',ecolor='r',ms=2.5,elinewidth=1.5,label=title_tof)
     hist_compare_tof,bins_compare_tof,_ =plt.hist(tof_Compare_select,bins_tof,label=title_tof_c)
         
-    #np.savetxt('integration_record/TOF_'+str(config['setup_info']['data']) + str(config['setup_info']['filter']) + '_' + str(config['setup_info']['thickness'])+'mm_'+ str(config['setup_info']['target'] )+'.txt',np.array(hist_in_tof))
-    #np.savetxt('integration_record/TOF_'+str(config_c['setup_info']['data']) + str(config_c['setup_info']['filter']) + '_' + str(config_c['setup_info']['thickness'])+'mm_'+ str(config_c['setup_info']['target'] )+'.txt',np.array(hist_compare_tof))
-    plt.legend(loc='upper right')
+    plt.legend()
     plt.xlabel('tof')
     plt.ylabel('N')
-    plt.savefig('./Nvstof',dpi=600)
+    plt.savefig('temp_data/Nvstof',dpi=600)
     plt.clf()
+    save_to_excel(hist_in,title_en,location)
+    save_to_excel(hist_compare,title_en_c,location)
+    save_to_excel(hist_in_tof,title_tof,location)
+    save_to_excel(hist_compare_tof,title_tof_c,location)
 else:
     if args.cut:
         hist_in,bins_in,_ = plt.hist(en_In_select,bins_en)
     else:
-        hist_in,bins_in,_ = plt.hist(en_In,bins_en)
-    
-    #np.savetxt('integration/integration_record/'+title_en, )
+        hist_in,bins_in,_ = plt.hist(en_In,bins_en)    
     plt.title(title_en)
     plt.xlabel('En')
     plt.ylabel('N')
-    plt.savefig('./NvsEn',dpi=600)
+    plt.savefig('temp_data/NvsEn',dpi=600)
     plt.clf()
     if args.cut:
         hist_in_tof,bins_in_tof,_ =  plt.hist(tof_In_select,bins_tof)
     else:
         hist_in_tof,bins_in_tof,_ = plt.hist(tof_In,bins_tof)    
-    #np.savetxt('integration/integration_record/'+title_tof) 
     plt.title(title_tof)
     plt.xlabel('tof')
     plt.ylabel('N')
-    plt.savefig('./Nvstof',dpi=600)
+    plt.savefig('temp_data/Nvstof',dpi=600)
     plt.clf()
+    save_to_excel(hist_in,title_en,location)
+    save_to_excel(hist_in_tof,title_tof,location)
     
 
 
