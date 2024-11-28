@@ -21,7 +21,7 @@ def get_data(file, detector):
 
 def compress(run_number):
     run_number= str(run_number)
-    f = h5py.File('h5'+run_number+'.h5','w')
+    f = h5py.File(run_number+'.h5','w')
     file= uproot.open("/Volumes/HC/data/run" + run_number + ".root")
 #    file= uproot.open("run" + run_number + ".root")
 
@@ -62,10 +62,13 @@ def compress(run_number):
     f.close()
 
 import yaml
-filename= '../config/stability.yml'
+filename= '../config/conditions.yml'
 with open(filename) as f:
     config= yaml.safe_load(f)
 c=config
 
-for i in c['Stability']['Air_bottle']['runlist']:
-    compress(i)   
+for i in c['empty']['runlist']:
+    compress(i)  
+    print(str(i) + '.h5 created.') 
+    if i == c['empty']['runlist'][-1]:
+        print ('work done !!!')

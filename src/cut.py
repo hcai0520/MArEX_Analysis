@@ -221,9 +221,9 @@ def FIMG_cut(detn):
 
 def data_cut(tof,amp,detector,detn,PI):
     tof_select= np.array([])
-    en_select= np.array([])
+    #en_select= np.array([])
     if detector == 'PTBC':
-        L = 182.65 - 0.41 # in m
+        #L = 182.65 - 0.41 # in m
         amp_para = amp[PI <= 6e12]
         tof_para = tof[PI <= 6e12]
         tof_para_select = data_cut_para(tof_para,amp_para)
@@ -233,7 +233,7 @@ def data_cut(tof,amp,detector,detn,PI):
                 tof_i = tof[ (tof > t[i][0]) & (tof < t[i][1]) & (amp > cut_line(t[i][0],a[i][0],t[i][1],a[i][1],tof))& (detn == j)&(PI > 6e12)]
                 tof_select = np.append(tof_select, tof_i) # in ns
         tof_select = np.append(tof_select, tof_para_select)   
-        en_select = TOFToEnergy(tof_select / 1e9, L, 939.56542, 299792458)*1e6 # in eV
+        #en_select = TOFToEnergy(tof_select / 1e9, L, 939.56542, 299792458)*1e6 # in eV
 
     if detector == 'FIMG':
         L = 183.5 - 0.41  # in m
@@ -244,9 +244,9 @@ def data_cut(tof,amp,detector,detn,PI):
             #print(len(tof_i))
                 tof_select = np.append(tof_select, tof_i) # in ns
            
-        en_select = TOFToEnergy(tof_select / 1e9, L, 939.56542, 299792458)*1e6 # in eV   
+        #en_select = TOFToEnergy(tof_select / 1e9, L, 939.56542, 299792458)*1e6 # in eV   
        
-    return tof_select, en_select
+    return tof_select
 def data_cut_para(tof,amp):
     tof_select= np.array([])
     t,a,n = para_cut()
@@ -260,13 +260,13 @@ def get_cut(input,detector):
     In = h5py.File(input, "r")
 
     amp = In[detector]['amp'][:]
-    tof=In[detector]['tof'][:]
+    tof = In[detector]['tof'][:]
     #en_In = input_in[detector]['energy'][:]
     detn = In[detector]['detn'][:]
     PI = In[detector]['PI'][:]
     norm = In[detector]['norm'][0]
     #print('read ' + str(input))
    
-    tof_In_select,en_In_select = data_cut(tof,amp,detector, detn,PI)
+    tof_In_select = data_cut(tof,amp,detector, detn,PI)
     
-    return tof_In_select,en_In_select,norm
+    return tof_In_select,norm
